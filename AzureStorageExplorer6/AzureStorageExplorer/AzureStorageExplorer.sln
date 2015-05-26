@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
-VisualStudioVersion = 12.0.30501.0
+VisualStudioVersion = 12.0.31101.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AzureStorageExplorer", "AzureStorageExplorer\AzureStorageExplorer.csproj", "{D4A91D0D-7CFF-437D-A05C-D7BC371CE4EC}"
 EndProject
@@ -11,8 +11,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{57147A
 		.nuget\NuGet.exe = .nuget\NuGet.exe
 		.nuget\NuGet.targets = .nuget\NuGet.targets
 	EndProjectSection
-EndProject
-Project("{6141683F-8A12-4E36-9623-2EB02B2C2303}") = "ASESetup", "ASESetup\ASESetup.isproj", "{B869CDB4-FF00-4686-ACF8-67FBCA43AF6D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -33,14 +31,6 @@ Global
 		{D4A91D0D-7CFF-437D-A05C-D7BC371CE4EC}.Release|Any CPU.Build.0 = Release|Any CPU
 		{D4A91D0D-7CFF-437D-A05C-D7BC371CE4EC}.SingleImage|Any CPU.ActiveCfg = Release|Any CPU
 		{D4A91D0D-7CFF-437D-A05C-D7BC371CE4EC}.SingleImage|Any CPU.Build.0 = Release|Any CPU
-		{B869CDB4-FF00-4686-ACF8-67FBCA43AF6D}.CD_ROM|Any CPU.ActiveCfg = CD_ROM
-		{B869CDB4-FF00-4686-ACF8-67FBCA43AF6D}.CD_ROM|Any CPU.Build.0 = CD_ROM
-		{B869CDB4-FF00-4686-ACF8-67FBCA43AF6D}.Debug|Any CPU.ActiveCfg = DVD-5
-		{B869CDB4-FF00-4686-ACF8-67FBCA43AF6D}.DVD-5|Any CPU.ActiveCfg = DVD-5
-		{B869CDB4-FF00-4686-ACF8-67FBCA43AF6D}.DVD-5|Any CPU.Build.0 = DVD-5
-		{B869CDB4-FF00-4686-ACF8-67FBCA43AF6D}.Release|Any CPU.ActiveCfg = SingleImage
-		{B869CDB4-FF00-4686-ACF8-67FBCA43AF6D}.SingleImage|Any CPU.ActiveCfg = SingleImage
-		{B869CDB4-FF00-4686-ACF8-67FBCA43AF6D}.SingleImage|Any CPU.Build.0 = SingleImage
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
