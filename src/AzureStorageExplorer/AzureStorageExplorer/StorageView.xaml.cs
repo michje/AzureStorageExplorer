@@ -2425,16 +2425,16 @@ namespace AzureStorageExplorer
 
             String message = "Are you sure you want to pop the top message from the queue?";
 
-            MessageBoxResult messageBoxResult = System.Windows.MessageBox.Show(message, "Confirm Delete", System.Windows.MessageBoxButton.YesNo);
+            MessageBoxResult messageBoxResult = System.Windows.MessageBox.Show(message, "Confirm Pop", System.Windows.MessageBoxButton.YesNo);
             if (messageBoxResult == MessageBoxResult.Yes)
             {
                 message = null;
-                message = "Deleting top message from queue " + SelectedQueueContainer;
+                message = "Pop top message from queue " + SelectedQueueContainer;
 
                 Action action = new Action()
                 {
                     Id = NextAction++,
-                    ActionType = Action.ACTION_DELETE_MESSAGES,
+                    ActionType = Action.ACTION_POP_MESSAGES,
                     IsCompleted = false,
                     Message = message
                 };
@@ -2467,7 +2467,62 @@ namespace AzureStorageExplorer
 
         }
 
+        private void MessageDelete_Click(object sender, RoutedEventArgs e)
+        {
+            NewAction();
 
+            if (MessageCollection.Count() == 0)
+            {
+                MessageBox.Show("The queue is empty.", "No Messages in Queue");
+                return;
+            }
+
+            String message = "Are you sure you want to delete the top message from the queue?";
+
+            MessageBoxResult messageBoxResult = System.Windows.MessageBox.Show(message, "Confirm Delete", System.Windows.MessageBoxButton.YesNo);
+            if (messageBoxResult == MessageBoxResult.Yes)
+            {
+                message = null;
+                message = "Deleting top message from queue " + SelectedQueueContainer;
+
+                Action action = new Action()
+                {
+                    Id = NextAction++,
+                    ActionType = Action.ACTION_DELETE_MESSAGES,
+                    IsCompleted = false,
+                    Message = message
+                };
+                Actions.Add(action.Id, action);
+
+                UpdateStatus();
+
+                Cursor = Cursors.Wait;
+
+                Task task = Task.Factory.StartNew(() =>
+                {
+                    CloudQueue container = queueClient.GetQueueReference(SelectedQueueContainer);
+
+                    int deletedCount = 0;
+                    CloudQueueMessage msg = container.GetMessage();
+
+                    container.DeleteMessage(msg.Id, msg.PopReceipt);
+
+                    deletedCount++;
+
+                    Actions[action.Id].IsCompleted = true;
+                });
+
+                task.ContinueWith((t) =>
+                {
+                    UpdateStatus();
+
+                    Cursor = Cursors.Arrow;
+
+                    ShowQueueContainer(SelectedQueueContainer);
+                }, TaskScheduler.FromCurrentSynchronizationContext());
+            }
+
+        }
         #endregion
 
         #region Table Entity Toolbar handlers

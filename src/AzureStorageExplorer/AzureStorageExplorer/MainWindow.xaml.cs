@@ -8,24 +8,17 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
+using System.Diagnostics;
 using System.IO;
-using System.Text;
-using System.Threading;
+using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
 using System.Windows;
-using System.Collections.ObjectModel;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
-using System.Windows.Forms;
 using AzureStorageExplorer.Helpers;
-using System.Windows;
+using Application = System.Windows.Forms.Application;
+
 namespace AzureStorageExplorer
 {
     /// <summary>
@@ -38,7 +31,7 @@ namespace AzureStorageExplorer
         private const String cipherKey = "lkjsojkweu798ynfgs";
 
         public static List<AzureAccount> Accounts = null;
-        public static System.Windows.Controls.TabControl StorageViewsTabControl = null;
+        public static TabControl StorageViewsTabControl = null;
         public static Dictionary<String, String> ContentTypes = new Dictionary<string, string>();
 
         #endregion
@@ -52,6 +45,7 @@ namespace AzureStorageExplorer
             InitializeComponent();
             StorageViewsTabControl = StorageViews;
             Accounts = new List<AzureAccount>();
+            SetAppVersionIndication();
             CenterWindowOnScreen();
             LoadAccountList();
             LoadContentTypes();
@@ -78,7 +72,7 @@ namespace AzureStorageExplorer
             if (dlg.ShowDialog().Value)
             {
                 String accountName = dlg.AccountName.Text;
-                
+
                 AzureAccount account = new AzureAccount()
                 {
                     IsDeveloperAccount = dlg.AccountTypeDev.IsChecked.Value,
@@ -118,25 +112,25 @@ namespace AzureStorageExplorer
 
         private void RemoveAccount_Click(object sender, RoutedEventArgs e)
         {
-            if (AccountList.SelectedIndex==-1 | AccountList.SelectedIndex==0) return;
+            if (AccountList.SelectedIndex == -1 | AccountList.SelectedIndex == 0) return;
 
-            int index = AccountList.SelectedIndex-1;
+            int index = AccountList.SelectedIndex - 1;
 
             String accountName = Accounts[index].Name;
 
             // Confirm removal of storage account.
 
-            if (System.Windows.MessageBox.Show("Are you sure you want to remove '" + accountName + "' from your list of storage accounts?", "Confirm Remove Storage Account", MessageBoxButton.YesNo)==MessageBoxResult.Yes)
-            { 
+            if (MessageBox.Show("Are you sure you want to remove '" + accountName + "' from your list of storage accounts?", "Confirm Remove Storage Account", MessageBoxButton.YesNo) == MessageBoxResult.Yes)
+            {
                 // If account is currently displayed, removed its tab.
 
                 if (StorageViewsTabControl.Items != null)
                 {
-                    foreach(TabItem item in StorageViewsTabControl.Items)
+                    foreach (TabItem item in StorageViewsTabControl.Items)
                     {
                         StorageView view = item.Content as StorageView;
-                        if (view != null && view.Account.Name==accountName)
-                        { 
+                        if (view != null && view.Account.Name == accountName)
+                        {
                             StorageViewsTabControl.Items.Remove(item);
                             break;
                         }
@@ -145,14 +139,14 @@ namespace AzureStorageExplorer
 
                 // Remove account from internal list and save it. Remove account from accounts selection list.
 
-                Cursor = System.Windows.Input.Cursors.Wait;
+                Cursor = Cursors.Wait;
                 AccountList.Items.RemoveAt(index);
                 AccountList.SelectedIndex = -1;
                 Accounts.RemoveAt(index);
 
                 SaveAccountList();
 
-                Cursor = System.Windows.Input.Cursors.Arrow;
+                Cursor = Cursors.Arrow;
             }
         }
 
@@ -212,12 +206,12 @@ namespace AzureStorageExplorer
                 //item.Header = account.Name;
 
                 StackPanel panel = new StackPanel();
-                panel.Orientation = System.Windows.Controls.Orientation.Horizontal;
+                panel.Orientation = Orientation.Horizontal;
                 TextBlock title = new TextBlock() { Text = account.Name + " " };
                 panel.Children.Add(title);
                 TextBlock closeBox = new TextBlock() { Text = "×" };
                 closeBox.Tag = account.Name;
-                closeBox.Cursor = System.Windows.Input.Cursors.Hand;
+                closeBox.Cursor = Cursors.Hand;
                 closeBox.MouseDown += new MouseButtonEventHandler(CloseStorageView);
                 panel.Children.Add(closeBox);
                 item.Header = panel;
@@ -293,7 +287,7 @@ namespace AzureStorageExplorer
 
         private void LoadAccountList()
         {
-            String filename = System.Windows.Forms.Application.UserAppDataPath + "\\AzureStorageExplorer6.dt1";
+            String filename = Application.UserAppDataPath + "\\AzureStorageExplorer6.dt1";
 
             Accounts.Clear();
 
@@ -332,7 +326,7 @@ namespace AzureStorageExplorer
                                 Accounts.Add(account);
                             }
                         }
-                        catch(Exception)
+                        catch (Exception)
                         {
                             // If something is wrong in the account data file, don't let that stop the rest from loading.
                         }
@@ -357,7 +351,7 @@ namespace AzureStorageExplorer
 
             // Save account list, encrypted.
 
-            String filename = System.Windows.Forms.Application.UserAppDataPath + "\\AzureStorageExplorer6.dt1";
+            String filename = Application.UserAppDataPath + "\\AzureStorageExplorer6.dt1";
 
             using (TextWriter writer = File.CreateText(filename))
             {
@@ -394,6 +388,10 @@ namespace AzureStorageExplorer
             }
         }
 
+        private void SetAppVersionIndication()
+        {
+            Title = string.Format("{0} ({1})", Title, Assembly.GetExecutingAssembly().GetName().Version);
+        }
 
         //**************************
         //*                        *
@@ -404,8 +402,8 @@ namespace AzureStorageExplorer
 
         private void CenterWindowOnScreen()
         {
-            double screenWidth = System.Windows.SystemParameters.PrimaryScreenWidth;
-            double screenHeight = System.Windows.SystemParameters.PrimaryScreenHeight;
+            double screenWidth = SystemParameters.PrimaryScreenWidth;
+            double screenHeight = SystemParameters.PrimaryScreenHeight;
             double windowWidth = this.Width;
             double windowHeight = this.Height;
             this.Left = (screenWidth / 2) - (windowWidth / 2);
@@ -437,7 +435,7 @@ namespace AzureStorageExplorer
                     // Open a tab for each storage account.
 
                     int index = 0;
-                    foreach(String item in AccountList.Items)
+                    foreach (String item in AccountList.Items)
                     {
                         if (index > 1)
                         {
@@ -447,7 +445,7 @@ namespace AzureStorageExplorer
                     }
                 }
                 else
-                { 
+                {
                     // Open a tab for the selected storage account.
 
                     AddStorageView(name);
@@ -477,9 +475,9 @@ namespace AzureStorageExplorer
         //********************
         //About Azure Storage Explorer.
 
-        private void MainMenu_About(object sender, System.Windows.RoutedEventArgs e)
+        private void MainMenu_About(object sender, RoutedEventArgs e)
         {
-            System.Windows.MessageBox.Show("Azure Storage Explorer 6 Preview 3 (6.0.3.1)", "About");
+            MessageBox.Show("Azure Storage Explorer 6 Preview 3 (6.0.3.1)", "About");
         }
 
 
@@ -504,13 +502,13 @@ namespace AzureStorageExplorer
         //*********************
         // Launch the Microsoft Azure management portal in a browser. manage.windowsazure.com
 
-        private void MainMenu_Portal(object sender, System.Windows.RoutedEventArgs e)
+        private void MainMenu_Portal(object sender, RoutedEventArgs e)
         {
             try
             {
-                System.Diagnostics.Process.Start("http://manage.windowsazure.com");
+                Process.Start("http://manage.windowsazure.com");
             }
-            catch(Exception)
+            catch (Exception)
             {
             }
         }
@@ -522,11 +520,11 @@ namespace AzureStorageExplorer
         //***************************
         // Launch the Azure Storage Explorer codeplex page.
 
-        private void MainMenu_CodeplexPage(object sender, System.Windows.RoutedEventArgs e)
+        private void MainMenu_CodeplexPage(object sender, RoutedEventArgs e)
         {
             try
             {
-                System.Diagnostics.Process.Start("http://azurestorageexplorer.codeplex.com");
+                Process.Start("http://azurestorageexplorer.codeplex.com");
             }
             catch (Exception)
             {
@@ -543,7 +541,7 @@ namespace AzureStorageExplorer
         //***********************
         // Edit content types.
 
-        private void ContentType_Click(object sender, System.Windows.RoutedEventArgs e)
+        private void ContentType_Click(object sender, RoutedEventArgs e)
         {
             ContentTypesDialog dlg = new ContentTypesDialog();
 
@@ -551,12 +549,12 @@ namespace AzureStorageExplorer
 
             if (dlg.ShowDialog().Value)
             {
-                this.Cursor = System.Windows.Input.Cursors.Wait;
+                this.Cursor = Cursors.Wait;
 
                 ContentTypes = dlg.GetContentTypes();
                 SaveContentTypes();
 
-                this.Cursor = System.Windows.Input.Cursors.Arrow;
+                this.Cursor = Cursors.Arrow;
             }
         }
 
@@ -571,10 +569,10 @@ namespace AzureStorageExplorer
         {
             try
             {
-                String filename = System.Windows.Forms.Application.UserAppDataPath + "\\AzureStorageExplorer6-ContentTypes.dt1";
+                String filename = Application.UserAppDataPath + "\\AzureStorageExplorer6-ContentTypes.dt1";
                 String line, name, value;
 
-                MainWindow.ContentTypes.Clear();
+                ContentTypes.Clear();
 
                 if (File.Exists(filename))
                 {
@@ -590,7 +588,7 @@ namespace AzureStorageExplorer
                                 {
                                     name = items[0];
                                     value = items[1];
-                                    MainWindow.ContentTypes.Add(name, value);
+                                    ContentTypes.Add(name, value);
                                 }
                                 catch (Exception)
                                 {
@@ -603,49 +601,49 @@ namespace AzureStorageExplorer
                 {
                     // Load default content types table.
 
-                    MainWindow.ContentTypes.Add(".avi", "video/msvideo");
-                    MainWindow.ContentTypes.Add(".bmp", "image/bmp");
-                    MainWindow.ContentTypes.Add(".css", "text/css");
-                    MainWindow.ContentTypes.Add(".dtd", "application/xml-dtd");
-                    MainWindow.ContentTypes.Add(".doc", "application/msword");
-                    MainWindow.ContentTypes.Add(".docx", "application/msword");
-                    MainWindow.ContentTypes.Add(".exe", "application/octet-stream");
-                    MainWindow.ContentTypes.Add(".gif", "image/gif");
-                    MainWindow.ContentTypes.Add(".gz", "application/x-gzip");
-                    MainWindow.ContentTypes.Add(".htm", "text/html");
-                    MainWindow.ContentTypes.Add(".html", "text/html");
-                    MainWindow.ContentTypes.Add(".jar", "application/java-archive");
-                    MainWindow.ContentTypes.Add(".jpg", "image/jpeg");
-                    MainWindow.ContentTypes.Add(".jpeg", "image/jpeg");
-                    MainWindow.ContentTypes.Add(".js", "application/x-javascript");
-                    MainWindow.ContentTypes.Add(".midi", "audio/x-midi");
-                    MainWindow.ContentTypes.Add(".mp3", "audio/mpeg");
-                    MainWindow.ContentTypes.Add(".mpg", "video/mpeg");
-                    MainWindow.ContentTypes.Add(".mpeg", "video/mpeg");
-                    MainWindow.ContentTypes.Add(".ogg", "audio/vorbis, application/ogg");
-                    MainWindow.ContentTypes.Add(".pdf", "application/pdf");
-                    MainWindow.ContentTypes.Add(".pl", "application/x-perl");
-                    MainWindow.ContentTypes.Add(".png", "image/png");
-                    MainWindow.ContentTypes.Add("ppt", "application/vnd.ms-powerpoint");
-                    MainWindow.ContentTypes.Add(".pptx", "application/vnd.ms-powerpoint");
-                    MainWindow.ContentTypes.Add(".ps", "application/postscript");
-                    MainWindow.ContentTypes.Add(".qt", "video/quicktime");
-                    MainWindow.ContentTypes.Add(".ra", "audio/x-pn-realaudio, audio/vnd.rn-realaudio");
-                    MainWindow.ContentTypes.Add(".ram", "audio/x-pn-realaudio, audio/vnd.rn-realaudio");
-                    MainWindow.ContentTypes.Add(".rdf", "application/rdf, application/rdf+xml");
-                    MainWindow.ContentTypes.Add(".rtf", "application/rtf");
-                    MainWindow.ContentTypes.Add(".sgml", "text/sgml");
-                    MainWindow.ContentTypes.Add(".svg", "image/svg+xml");
-                    MainWindow.ContentTypes.Add(".swf", "application/x-shockwave-flash");
-                    MainWindow.ContentTypes.Add(".tar.gz", "application/x-tar");
-                    MainWindow.ContentTypes.Add(".tgz", "application/x-tar");
-                    MainWindow.ContentTypes.Add(".tiff", "image/tiff");
-                    MainWindow.ContentTypes.Add(".tsv", "text/tab-separated-values");
-                    MainWindow.ContentTypes.Add(".txt", "text/plain");
-                    MainWindow.ContentTypes.Add(".wav", "audio/wav, audio/x-wav");
-                    MainWindow.ContentTypes.Add(".xls", "application/vnd.ms-excel");
-                    MainWindow.ContentTypes.Add(".xml", "application/xml");
-                    MainWindow.ContentTypes.Add(".zip", "application/zip");
+                    ContentTypes.Add(".avi", "video/msvideo");
+                    ContentTypes.Add(".bmp", "image/bmp");
+                    ContentTypes.Add(".css", "text/css");
+                    ContentTypes.Add(".dtd", "application/xml-dtd");
+                    ContentTypes.Add(".doc", "application/msword");
+                    ContentTypes.Add(".docx", "application/msword");
+                    ContentTypes.Add(".exe", "application/octet-stream");
+                    ContentTypes.Add(".gif", "image/gif");
+                    ContentTypes.Add(".gz", "application/x-gzip");
+                    ContentTypes.Add(".htm", "text/html");
+                    ContentTypes.Add(".html", "text/html");
+                    ContentTypes.Add(".jar", "application/java-archive");
+                    ContentTypes.Add(".jpg", "image/jpeg");
+                    ContentTypes.Add(".jpeg", "image/jpeg");
+                    ContentTypes.Add(".js", "application/x-javascript");
+                    ContentTypes.Add(".midi", "audio/x-midi");
+                    ContentTypes.Add(".mp3", "audio/mpeg");
+                    ContentTypes.Add(".mpg", "video/mpeg");
+                    ContentTypes.Add(".mpeg", "video/mpeg");
+                    ContentTypes.Add(".ogg", "audio/vorbis, application/ogg");
+                    ContentTypes.Add(".pdf", "application/pdf");
+                    ContentTypes.Add(".pl", "application/x-perl");
+                    ContentTypes.Add(".png", "image/png");
+                    ContentTypes.Add("ppt", "application/vnd.ms-powerpoint");
+                    ContentTypes.Add(".pptx", "application/vnd.ms-powerpoint");
+                    ContentTypes.Add(".ps", "application/postscript");
+                    ContentTypes.Add(".qt", "video/quicktime");
+                    ContentTypes.Add(".ra", "audio/x-pn-realaudio, audio/vnd.rn-realaudio");
+                    ContentTypes.Add(".ram", "audio/x-pn-realaudio, audio/vnd.rn-realaudio");
+                    ContentTypes.Add(".rdf", "application/rdf, application/rdf+xml");
+                    ContentTypes.Add(".rtf", "application/rtf");
+                    ContentTypes.Add(".sgml", "text/sgml");
+                    ContentTypes.Add(".svg", "image/svg+xml");
+                    ContentTypes.Add(".swf", "application/x-shockwave-flash");
+                    ContentTypes.Add(".tar.gz", "application/x-tar");
+                    ContentTypes.Add(".tgz", "application/x-tar");
+                    ContentTypes.Add(".tiff", "image/tiff");
+                    ContentTypes.Add(".tsv", "text/tab-separated-values");
+                    ContentTypes.Add(".txt", "text/plain");
+                    ContentTypes.Add(".wav", "audio/wav, audio/x-wav");
+                    ContentTypes.Add(".xls", "application/vnd.ms-excel");
+                    ContentTypes.Add(".xml", "application/xml");
+                    ContentTypes.Add(".zip", "application/zip");
                 }
             } // end try
             catch (Exception ex)
@@ -667,7 +665,7 @@ namespace AzureStorageExplorer
 
             Accounts = Accounts.OrderBy(o => o.Name).ToList();
 
-            String filename = System.Windows.Forms.Application.UserAppDataPath + "\\AzureStorageExplorer6-ContentTypes.dt1";
+            String filename = Application.UserAppDataPath + "\\AzureStorageExplorer6-ContentTypes.dt1";
 
             using (TextWriter writer = File.CreateText(filename))
             {

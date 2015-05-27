@@ -24,7 +24,7 @@ namespace AzureStorageExplorer
         public const int ACTION_DELETE_QUEUE = 13;
         public const int ACTION_DELETE_MESSAGES = 14;
         public const int ACTION_UPLOAD_ENTITIES = 15;
-
+        public const int ACTION_POP_MESSAGES = 16;
 
         public int Id { get; set; }
         public int ActionType { get; set; }
